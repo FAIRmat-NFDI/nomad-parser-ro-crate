@@ -1,0 +1,177 @@
+{
+  "@context" : [ "https://w3id.org/ro/crate/1.1/context", {
+    "schema" : "https://schema.org",
+    "owl" : "http://www.w3.org/2002/07/owl#",
+    "openBIS" : "www.openbis.ch"
+  } ],
+  "@graph" : [ {
+    "name" : "Example RO-Crate with Schema",
+    "description" : "A comprehensive example of an RO-Crate following the interoperability profile with RDFS schema definitions and data instances.",
+    "@id" : "./",
+    "@type" : "Dataset",
+    "license" : {
+      "@id" : "https://creativecommons.org/licenses/by/4.0/"
+    },
+    "datePublished" : "2024-12-04T07:53:11Z",
+    "hasPart" : [ {
+      "@id" : "COLLECTION"
+    }, {
+      "@id" : "PUBLICATION_CREATOR"
+    }, {
+      "@id" : "PUBLICATION"
+    }, {
+      "@id" : "PUBLICATION_PUBLISHER"
+    }, {
+      "@id" : "example-publication"
+    }, {
+      "@id" : "example-creator"
+    }, {
+      "@id" : "example-publisher"
+    } ]
+  }, {
+    "about" : {
+      "@id" : "./"
+    },
+    "conformsTo" : {
+      "@id" : "https://w3id.org/ro/crate/1.1"
+    },
+    "@id" : "ro-crate-metadata.json",
+    "@type" : "CreativeWork"
+  }, {
+    "@id" : "PUBLICATION",
+    "@type" : "rdfs:Class",
+    "rdfs:subClassOf" : {
+      "@id" : "schema:CreativeWork"
+    },
+    "rdfs:label" : "Publication",
+    "rdfs:comment" : "A published work such as an article, book, or report",
+    "owl:equivalentClass" : {
+      "@id" : "https://schema.org/CreativeWork"
+    }
+  }, {
+    "@id" : "PUBLICATION_CREATOR",
+    "@type" : "rdfs:Class",
+    "rdfs:subClassOf" : {
+      "@id" : "schema:Person"
+    },
+    "rdfs:label" : "Publication Creator",
+    "rdfs:comment" : "A person who created or authored a publication",
+    "owl:equivalentClass" : {
+      "@id" : "https://schema.org/Person"
+    }
+  }, {
+    "@id" : "PUBLICATION_PUBLISHER",
+    "@type" : "rdfs:Class",
+    "rdfs:subClassOf" : {
+      "@id" : "schema:Organization"
+    },
+    "rdfs:label" : "Publication Publisher",
+    "rdfs:comment" : "An organization that publishes works",
+    "owl:equivalentClass" : {
+      "@id" : "https://schema.org/Organization"
+    }
+  }, {
+    "@type" : "rdfs:Property",
+    "rdfs:label" : "Title",
+    "rdfs:comment" : "The title of the publication",
+    "@id" : "openBIS:hasTitle",
+    "schema:rangeIncludes" : {
+      "@id" : "xsd:string"
+    },
+    "schema:domainIncludes" : {
+      "@id" : "PUBLICATION"
+    },
+    "owl:equivalentProperty" : {
+      "@id" : "https://schema.org/name"
+    }
+  }, {
+    "@type" : "rdfs:Property",
+    "rdfs:label" : "Author",
+    "rdfs:comment" : "The author of the publication",
+    "@id" : "openBIS:hasAuthor",
+    "schema:rangeIncludes" : {
+      "@id" : "PUBLICATION_CREATOR"
+    },
+    "schema:domainIncludes" : {
+      "@id" : "PUBLICATION"
+    },
+    "owl:equivalentProperty" : {
+      "@id" : "https://schema.org/author"
+    }
+  }, {
+    "@type" : "rdfs:Property",
+    "rdfs:label" : "Publisher",
+    "rdfs:comment" : "The publisher of the publication",
+    "@id" : "openBIS:hasPublisher",
+    "schema:rangeIncludes" : {
+      "@id" : "PUBLICATION_PUBLISHER"
+    },
+    "schema:domainIncludes" : {
+      "@id" : "PUBLICATION"
+    },
+    "owl:equivalentProperty" : {
+      "@id" : "https://schema.org/publisher"
+    }
+  }, {
+    "@type" : "rdfs:Property",
+    "rdfs:label" : "Given Name",
+    "rdfs:comment" : "The given name of the person",
+    "@id" : "openBIS:hasGivenName",
+    "schema:rangeIncludes" : {
+      "@id" : "xsd:string"
+    },
+    "schema:domainIncludes" : {
+      "@id" : "PUBLICATION_CREATOR"
+    },
+    "owl:equivalentProperty" : {
+      "@id" : "https://schema.org/givenName"
+    }
+  }, {
+    "@type" : "rdfs:Property",
+    "rdfs:label" : "Family Name",
+    "rdfs:comment" : "The family name of the person",
+    "@id" : "openBIS:hasFamilyName",
+    "schema:rangeIncludes" : {
+      "@id" : "xsd:string"
+    },
+    "schema:domainIncludes" : {
+      "@id" : "PUBLICATION_CREATOR"
+    },
+    "owl:equivalentProperty" : {
+      "@id" : "https://schema.org/familyName"
+    }
+  }, {
+    "@type" : "rdfs:Property",
+    "rdfs:label" : "Organization Name",
+    "rdfs:comment" : "The name of the organization",
+    "@id" : "openBIS:hasOrganizationName",
+    "schema:rangeIncludes" : {
+      "@id" : "xsd:string"
+    },
+    "schema:domainIncludes" : {
+      "@id" : "PUBLICATION_PUBLISHER"
+    },
+    "owl:equivalentProperty" : {
+      "@id" : "https://schema.org/name"
+    }
+  }, {
+    "@type" : "PUBLICATION",
+    "openBIS:hasTitle" : "Example Research Publication",
+    "openBIS:hasAuthor" : {
+      "@id" : "example-creator"
+    },
+    "openBIS:hasPublisher" : {
+      "@id" : "example-publisher"
+    },
+    "@id" : "example-publication"
+  }, {
+    "@type" : "PUBLICATION_CREATOR",
+    "openBIS:hasGivenName" : "Jane",
+    "openBIS:hasFamilyName" : "Doe",
+    "@id" : "example-creator"
+  }, {
+    "@type" : "PUBLICATION_PUBLISHER",
+    "openBIS:hasOrganizationName" : "Example Academic Press",
+    "@id" : "example-publisher"
+  } ]
+}

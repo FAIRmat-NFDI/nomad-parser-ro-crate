@@ -1,0 +1,44 @@
+code_category: Data management
+code_homepage: https://w3id.org/ro/crate
+code_name: RO-Crate
+metadata:
+  codeCategory: Data management
+  codeLabel: RO-Crate
+  codeLabelStyle: RO in capitals, hyphen, Crate with capital C
+  codeName: ro-crate
+  codeUrl: https://w3id.org/ro/crate
+  parserDirName: dependencies/parsers/nomad-parser-ro-crate/
+  parserGitUrl: https://github.com/nomad-coe/nomad-parser-ro-crate.git
+  parserSpecific: |
+    ## Usage notes
+    The parser processes RO-Crate metadata files that follow the RO-Crate specification.
+    It extracts RDFS schema definitions (classes and properties) and data instances
+    from the JSON-LD @graph structure.
+
+    The parser supports:
+    - RDFS class and property definitions
+    - Dynamic metainfo section creation from schema
+    - Data instance extraction and validation
+    - Context preservation (@context field)
+    - Raw JSON-LD data preservation
+
+    For optimal parsing results:
+    - Ensure ro-crate-metadata.json follows the RO-Crate 1.1 specification
+    - Include RDFS schema definitions in the @graph for dynamic typing
+    - Use standard schema.org vocabulary where possible
+
+    ## RO-Crate Specification
+    RO-Crate (Research Object Crate) is a community effort to establish a lightweight approach 
+    to packaging research data with their metadata. It builds on JSON-LD and schema.org to provide
+    a format for describing research outputs.
+  preamble: ''
+  status: development
+  tableOfFiles: |
+    | Input Filename | Description |
+    | --- | --- |
+    | `ro-crate-metadata.json` | **Mainfile**: RO-Crate metadata file in JSON-LD format |
+    | Other files referenced in RO-Crate | Additional files described in the metadata |
+name: parsers/ro-crate
+parser_class_name: nomad_parser_ro_crate.parsers.parser.ROCrateParser
+python_package: nomad_parser_ro_crate.parsers
+plugin_source_code_url: https://github.com/nomad-coe/nomad-parser-ro-crate
