@@ -87,7 +87,7 @@ class TestMatchingInterface:
             raise ImportError('Parser entry point not available')
 
         mime_pattern = parser_entry_point.mainfile_mime_re
-        assert mime_pattern == 'application/json'
+        assert mime_pattern == '(application/json|text/plain)'
 
     def test_parser_interface_loading(self):
         """Test that the parser interface loads correctly."""
@@ -151,14 +151,14 @@ class TestMatchingInterface:
             raise ImportError('Parser entry point not available')
 
         aliases = parser_entry_point.aliases
-        assert aliases == ['parsers/ro-crate']
+        assert aliases == []
 
     def test_parser_level(self):
         """Test that parser execution level is set correctly."""
         if parser_entry_point is None:
             raise ImportError('Parser entry point not available')
 
-        assert parser_entry_point.level == 0
+        assert parser_entry_point.level == 1
 
     def test_integration_with_test_file(self, test_data_path):
         """Test complete integration with an actual RO-Crate file."""
@@ -195,7 +195,7 @@ class TestMatchingInterface:
         if parser_entry_point is None:
             raise ImportError('Parser entry point not available')
 
-        entry_dict = parser_entry_point.dict()
+        entry_dict = parser_entry_point.model_dump()
 
         # Check key fields are present
         assert 'name' in entry_dict

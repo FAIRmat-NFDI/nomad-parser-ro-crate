@@ -87,7 +87,7 @@ For optimal parsing results:
     def load(self):
         from nomad.parsing import MatchingParserInterface
 
-        return MatchingParserInterface(**self.dict())
+        return MatchingParserInterface(**self.model_dump())
 
 
 parser_entry_point = ROCrateParserEntryPoint(
