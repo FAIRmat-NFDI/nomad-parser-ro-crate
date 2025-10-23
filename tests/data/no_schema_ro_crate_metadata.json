@@ -1,0 +1,25 @@
+{
+  "@context": [
+    "https://w3id.org/ro/crate/1.1/context"
+  ],
+  "@graph": [
+    {
+      "@id": "./",
+      "@type": "Dataset",
+      "name": "No Schema Dataset",
+      "description": "A dataset with no RDFS schema definitions"
+    },
+    {
+      "@id": "ro-crate-metadata.json",
+      "@type": "CreativeWork",
+      "about": {"@id": "./"},
+      "conformsTo": {"@id": "https://w3id.org/ro/crate/1.1"}
+    },
+    {
+      "@id": "simple-data",
+      "@type": "File",
+      "name": "data.txt",
+      "description": "A simple data file"
+    }
+  ]
+}

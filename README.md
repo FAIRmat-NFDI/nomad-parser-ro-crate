@@ -1,8 +1,91 @@
-# nomad-parser-ro-crate
+# NOMAD RO-Crate Parser
 
-A parser for ro-crate schema plus.
+A NOMAD parser for RO-Crate metadata files that works similarly to the MetaInfoParser. This parser can read RO-Crate JSON-LD files and extract schema definitions and data instances into NOMAD archives.
 
-This `nomad` plugin was generated with `Cookiecutter` along with `@nomad`'s [`cookiecutter-nomad-plugin`](https://github.com/FAIRmat-NFDI/cookiecutter-nomad-plugin) template.
+## Features
+
+- **RO-Crate JSON-LD Support**: Reads `ro-crate-metadata.json` files following the RO-Crate specification
+- **Schema Extraction**: Automatically extracts RDFS class and property definitions from the RO-Crate
+- **Dynamic Metainfo**: Creates NOMAD metainfo structures based on the discovered schema
+- **Data Population**: Populates NOMAD archives with data instances following the extracted schema
+- **MetaInfoParser-like Functionality**: Similar workflow to NOMAD's existing MetaInfoParser for YAML files
+
+## How It Works
+
+1. **JSON-LD Parsing**: Loads the RO-Crate metadata file and extracts the `@graph` array
+2. **Schema Discovery**: Identifies RDFS classes (`rdfs:Class`) and properties (`rdfs:Property`) 
+3. **Type Mapping**: Maps XSD data types to Python types for NOMAD quantities
+4. **Archive Population**: Creates a structured NOMAD archive with:
+   - Context information from the RO-Crate
+   - Counts of discovered schema elements
+   - Raw JSON-LD data for reference
+
+## Supported File Pattern
+
+The parser matches files with the pattern: `.*ro-crate-metadata\.json$`
+
+## Example Usage
+
+The parser automatically processes RO-Crate files when they are uploaded to NOMAD. For testing:
+
+```bash
+# Run the test with a simple example
+uv run python test_ro_crate_parser.py
+
+# Run the test with a real RO-Crate file
+uv run python test_real_ro_crate.py
+```
+
+## Archive Structure
+
+The parser creates a `ROCrateData` section in the archive containing:
+
+- `crate_context`: The `@context` from the RO-Crate JSON-LD
+- `rdfs_classes_count`: Number of RDFS classes found
+- `rdfs_properties_count`: Number of RDFS properties found  
+- `data_instances_count`: Number of data instances found
+- `raw_data`: Complete raw JSON-LD data
+
+## RO-Crate Interoperability Profile Support
+
+This parser is designed to work with the RO-Crate Interoperability Profile, supporting:
+
+- RDFS class and property definitions
+- Schema.org vocabulary mappings
+- OWL restrictions and cardinalities
+- Custom namespace definitions
+
+## Example RO-Crate Structure
+
+```json
+{
+  "@context": [
+    "https://w3id.org/ro/crate/1.1/context",
+    {
+      "schema": "https://schema.org",
+      "rdfs": "http://www.w3.org/2000/01/rdf-schema#"
+    }
+  ],
+  "@graph": [
+    {
+      "@id": "MyClass",
+      "@type": "rdfs:Class",
+      "rdfs:label": "My Custom Class"
+    },
+    {
+      "@id": "myProperty", 
+      "@type": "rdfs:Property",
+      "schema:domainIncludes": {"@id": "MyClass"},
+      "schema:rangeIncludes": {"@id": "xsd:string"}
+    },
+    {
+      "@id": "instance1",
+      "@type": "MyClass",
+      "myProperty": "Hello World!"
+    }
+  ]
+}
+```
 
 ## Development
 

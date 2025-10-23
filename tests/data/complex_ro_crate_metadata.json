@@ -1,0 +1,82 @@
+{
+  "@context": [
+    "https://w3id.org/ro/crate/1.1/context",
+    {
+      "schema": "https://schema.org",
+      "owl": "http://www.w3.org/2002/07/owl#",
+      "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
+      "example": "http://example.org/"
+    }
+  ],
+  "@graph": [
+    {
+      "@id": "./",
+      "@type": "Dataset",
+      "name": "Complex Test Dataset",
+      "description": "A complex test RO-Crate dataset with multiple classes and properties"
+    },
+    {
+      "@id": "ro-crate-metadata.json",
+      "@type": "CreativeWork",
+      "about": {"@id": "./"},
+      "conformsTo": {"@id": "https://w3id.org/ro/crate/1.1"}
+    },
+    {
+      "@id": "Person",
+      "@type": "rdfs:Class",
+      "rdfs:label": "Person",
+      "rdfs:comment": "A person entity"
+    },
+    {
+      "@id": "Organization",
+      "@type": "rdfs:Class",
+      "rdfs:label": "Organization",
+      "rdfs:comment": "An organization entity"
+    },
+    {
+      "@id": "hasName",
+      "@type": "rdfs:Property",
+      "rdfs:label": "Name",
+      "rdfs:comment": "The name of an entity",
+      "schema:domainIncludes": [
+        {"@id": "Person"},
+        {"@id": "Organization"}
+      ],
+      "schema:rangeIncludes": {"@id": "xsd:string"}
+    },
+    {
+      "@id": "hasAge",
+      "@type": "rdfs:Property",
+      "rdfs:label": "Age",
+      "rdfs:comment": "The age of a person",
+      "schema:domainIncludes": {"@id": "Person"},
+      "schema:rangeIncludes": {"@id": "xsd:int"}
+    },
+    {
+      "@id": "worksFor",
+      "@type": "rdfs:Property",
+      "rdfs:label": "Works For",
+      "rdfs:comment": "The organization a person works for",
+      "schema:domainIncludes": {"@id": "Person"},
+      "schema:rangeIncludes": {"@id": "Organization"}
+    },
+    {
+      "@id": "person1",
+      "@type": "Person",
+      "hasName": "Alice Smith",
+      "hasAge": 30,
+      "worksFor": {"@id": "org1"}
+    },
+    {
+      "@id": "person2", 
+      "@type": "Person",
+      "hasName": "Bob Jones",
+      "hasAge": 25
+    },
+    {
+      "@id": "org1",
+      "@type": "Organization",
+      "hasName": "Tech Corp"
+    }
+  ]
+}
