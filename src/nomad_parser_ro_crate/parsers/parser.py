@@ -74,7 +74,7 @@ class ROCrateParser(MatchingParser):
             name='parsers/ro-crate',
             code_name='ro-crate',
             domain='generic',
-            mainfile_mime_re='application/json',
+            mainfile_mime_re=r'(application/json|text/plain)',
             mainfile_name_re=r'(^|.*/)ro-crate-metadata\.json$',
         )
         self._rdfs_classes = {}
@@ -247,14 +247,43 @@ class ROCrateParser(MatchingParser):
         3. Creates dynamic NOMAD sections
         4. Populates the archive with data
         """
-        logger.info(f'ROCrateParser.parse called for: {mainfile}') if logger else None
+        if logger:
+            logger.info(
+                f'ROCrateParser.parse called for: {mainfile}, '
+                f'archive id: {id(archive)}'
+            )
 
         # Check if this archive has already been processed by this parser
+        # Look for our processing marker first
+        if (hasattr(archive, 'm_annotations') and 
+            archive.m_annotations and 
+            archive.m_annotations.get('ro_crate_processed')):
+            if logger:
+                logger.warning(
+                    f'Archive already processed (marker found), '
+                    f'skipping: {mainfile}'
+                )
+            return
+
+        # Check if this archive has already been processed by this parser
+        # Look for multiple indicators to be more robust
         if (hasattr(archive, 'data') and archive.data and 
+            isinstance(archive.data, ROCrateData) and
             hasattr(archive.data, 'raw_data') and archive.data.raw_data):
             if logger:
                 logger.warning(
                     f'Archive already processed by RO-Crate parser, '
+                    f'skipping: {mainfile}'
+                )
+            return
+
+        # Also check if workflow2 is already set to our specific workflow
+        if (hasattr(archive, 'workflow2') and archive.workflow2 and
+            hasattr(archive.workflow2, 'name') and 
+            archive.workflow2.name == 'RO-Crate Processing'):
+            if logger:
+                logger.warning(
+                    f'Workflow already set by RO-Crate parser, '
                     f'skipping: {mainfile}'
                 )
             return
@@ -298,11 +327,16 @@ class ROCrateParser(MatchingParser):
             archive.data.data_instances_count = len(self._data_instances)
             archive.data.raw_data = json.dumps(ro_crate_data, indent=2)
 
-            # Set workflow information
+            # Set workflow information with a unique marker
             archive.workflow2 = Workflow(
                 name='RO-Crate Processing',
                 workflow_type='data_management'
             )
+            
+            # Add a processing marker to prevent duplicate processing
+            if not hasattr(archive, 'm_annotations'):
+                archive.m_annotations = {}
+            archive.m_annotations['ro_crate_processed'] = True
             
             # Add debugging info to help with upload issues
             if logger:

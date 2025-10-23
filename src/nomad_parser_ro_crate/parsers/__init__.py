@@ -23,12 +23,12 @@ from pydantic import Field
 class ROCrateParserEntryPoint(ParserEntryPoint):
     """
     Entry point for the RO-Crate JSON-LD parser.
-    
+
     This parser processes RO-Crate metadata files (ro-crate-metadata.json)
     that follow the RO-Crate specification and extracts schema definitions
     and data instances for NOMAD integration.
     """
-    
+
     parser_class_name: str = Field(
         'nomad_parser_ro_crate.parsers.parser.ROCrateParser',
         description="""
@@ -37,7 +37,7 @@ class ROCrateParserEntryPoint(ParserEntryPoint):
         """,
     )
     level: int = Field(
-        0,
+        1,
         description="""
         Order of execution of parser with respect to other parsers.
         """,
@@ -54,7 +54,7 @@ class ROCrateParserEntryPoint(ParserEntryPoint):
             'codeUrl': 'https://w3id.org/ro/crate',
             'parserDirName': 'dependencies/parsers/nomad-parser-ro-crate/',
             'parserGitUrl': 'https://github.com/nomad-coe/nomad-parser-ro-crate.git',
-            'parserSpecific': '''## Usage notes
+            'parserSpecific': """## Usage notes
 The parser processes RO-Crate metadata files that follow the RO-Crate specification.
 It extracts RDFS schema definitions (classes and properties) and data instances
 from the JSON-LD @graph structure.
@@ -70,14 +70,14 @@ For optimal parsing results:
 - Ensure ro-crate-metadata.json follows the RO-Crate 1.1 specification
 - Include RDFS schema definitions in the @graph for dynamic typing
 - Use standard schema.org vocabulary where possible
-''',
+""",
             'preamble': '',
             'status': 'development',
-            'tableOfFiles': '''| Input Filename | Description |
+            'tableOfFiles': """| Input Filename | Description |
 | --- | --- |
 | `ro-crate-metadata.json` | **Mainfile**: RO-Crate metadata file in JSON-LD format |
 | Other files referenced in RO-Crate | Additional files described in the metadata |
-''',
+""",
         },
         description="""
         Metadata passed to the UI for display and documentation.
@@ -86,13 +86,13 @@ For optimal parsing results:
 
     def load(self):
         from nomad.parsing import MatchingParserInterface
+
         return MatchingParserInterface(**self.dict())
 
 
 parser_entry_point = ROCrateParserEntryPoint(
     name='parsers/ro-crate',
-    aliases=['parsers/ro-crate'],
     description='NOMAD parser for RO-Crate JSON-LD metadata files.',
     mainfile_name_re=r'(^|.*/)ro-crate-metadata\.json$',
-    mainfile_mime_re=r'application/json',
+    mainfile_mime_re=r'(application/json|text/plain)',
 )
