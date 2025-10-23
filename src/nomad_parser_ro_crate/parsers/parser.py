@@ -10,6 +10,7 @@ if TYPE_CHECKING:
     )
 
 from nomad.config import config
+from nomad.datamodel.data import EntryData
 from nomad.datamodel.metainfo.workflow import Workflow
 from nomad.metainfo import (
     MSection,
@@ -23,7 +24,7 @@ configuration = config.get_plugin_entry_point(
 )
 
 
-class ROCrateData(MSection):
+class ROCrateData(EntryData):
     """A section to hold RO-Crate data."""
     
     crate_context = Quantity(
@@ -212,7 +213,7 @@ class ROCrateParser(MatchingParser):
 
         try:
             # Load the RO-Crate JSON-LD file
-            with open(mainfile) as f:
+            with open(mainfile, 'r', encoding='utf-8') as f:
                 ro_crate_data = json.load(f)
             
             # Extract the graph
@@ -239,13 +240,27 @@ class ROCrateParser(MatchingParser):
             archive.data.data_instances_count = len(self._data_instances)
             archive.data.raw_data = json.dumps(ro_crate_data, indent=2)
 
+            # Set workflow information
+            archive.workflow2 = Workflow(
+                name='RO-Crate Processing',
+                workflow_type='data_management'
+            )
+            
+            # Add debugging info to help with upload issues
             logger.info(
-                f'Populated archive with {len(self._data_instances)} data instances'
+                f'Archive populated: data={archive.data is not None}, '
+                f'workflow2={archive.workflow2 is not None}'
+            )
+            
+            # Log the parsing summary
+            logger.info(
+                f'Successfully processed RO-Crate with {len(self._data_instances)} '
+                f'data instances from {len(graph)} graph entities'
             )
 
-            # Set basic metadata
-            archive.workflow2 = Workflow(name='RO-Crate Processing')
-            
+        except json.JSONDecodeError as e:
+            logger.error(f'Invalid JSON in RO-Crate file: {e}')
+            raise
         except Exception as e:
             logger.error('Error parsing RO-Crate file', exc_info=e)
             raise
