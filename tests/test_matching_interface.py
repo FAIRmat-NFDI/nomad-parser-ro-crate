@@ -174,7 +174,7 @@ class TestMatchingInterface:
         parser_instance = parser_class()
 
         # Test with a simple RO-Crate file
-        test_file = test_data_path / 'simple_ro_crate_metadata.json'
+        test_file = test_data_path / 'simple_ro_crate' / 'ro-crate-metadata.json'
 
         if test_file.exists():
             # Create archive and logger
