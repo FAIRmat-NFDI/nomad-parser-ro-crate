@@ -84,11 +84,11 @@ def approx():
 
 
 # Test data file constants for easy reference
-SIMPLE_RO_CRATE = 'simple_ro_crate_metadata.json'
-COMPLEX_RO_CRATE = 'complex_ro_crate_metadata.json'
-NO_SCHEMA_RO_CRATE = 'no_schema_ro_crate_metadata.json'
-INVALID_RO_CRATE = 'invalid_ro_crate.json'
-REAL_EXAMPLE_RO_CRATE = 'real_example_ro_crate_metadata.json'
+SIMPLE_RO_CRATE = 'simple_ro_crate/ro-crate-metadata.json'
+COMPLEX_RO_CRATE = 'complex_ro_crate/ro-crate-metadata.json'
+NO_SCHEMA_RO_CRATE = 'no_schema_ro_crate/ro-crate-metadata.json'
+INVALID_RO_CRATE = 'invalid_ro_crate.json'  # This file doesn't exist anymore
+REAL_EXAMPLE_RO_CRATE = 'real_example_ro_crate/ro-crate-metadata.json'
 
 # Expected counts for test data files
 SIMPLE_RDFS_CLASSES = 1

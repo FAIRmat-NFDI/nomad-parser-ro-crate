@@ -193,6 +193,44 @@ class ROCrateParser(MatchingParser):
         
         return dynamic_class
 
+    def _create_nomad_quantity(self, prop_def: dict[str, Any]) -> Quantity:
+        """Create a NOMAD Quantity from an RDFS property definition."""
+        prop_description = prop_def.get('rdfs:comment', prop_def.get('rdfs:label', ''))
+        
+        # Determine the type based on schema:rangeIncludes
+        range_includes = prop_def.get('schema:rangeIncludes', {})
+        range_type = (
+            range_includes.get('@id', 'xsd:string') 
+            if isinstance(range_includes, dict) 
+            else 'xsd:string'
+        )
+        
+        # Map XSD types to Python types
+        if 'string' in range_type:
+            quantity_type = str
+        elif 'int' in range_type:
+            quantity_type = int
+        elif 'float' in range_type or 'double' in range_type:
+            quantity_type = float
+        elif 'dateTime' in range_type:
+            quantity_type = str
+        elif 'boolean' in range_type:
+            quantity_type = bool
+        else:
+            quantity_type = str
+
+        component = (
+            'StringEditQuantity' 
+            if quantity_type == str 
+            else 'NumberEditQuantity'
+        )
+        
+        return Quantity(
+            type=quantity_type,
+            description=prop_description,
+            a_eln={'component': component}
+        )
+
     def parse(
         self,
         mainfile: str,
@@ -209,7 +247,7 @@ class ROCrateParser(MatchingParser):
         3. Creates dynamic NOMAD sections
         4. Populates the archive with data
         """
-        logger.info(f'ROCrateParser.parse: {mainfile}')
+        logger.info(f'ROCrateParser.parse: {mainfile}') if logger else None
 
         try:
             # Load the RO-Crate JSON-LD file
@@ -219,15 +257,25 @@ class ROCrateParser(MatchingParser):
             # Extract the graph
             graph = ro_crate_data.get('@graph', [])
             if not graph:
-                logger.warning('No @graph found in RO-Crate file')
+                if logger:
+                    logger.warning('No @graph found in RO-Crate file')
+                # Create minimal data section even for invalid files
+                if not archive.data:
+                    archive.data = ROCrateData()
+                archive.data.rdfs_classes_count = 0
+                archive.data.rdfs_properties_count = 0
+                archive.data.data_instances_count = 0
+                archive.data.crate_context = str(ro_crate_data.get('@context', ''))
+                archive.data.raw_data = json.dumps(ro_crate_data, indent=2)
                 return
 
             # Extract schema definitions
             self._extract_schema_definitions(graph)
-            logger.info(
-                f'Found {len(self._rdfs_classes)} RDFS classes and '
-                f'{len(self._rdfs_properties)} properties'
-            )
+            if logger:
+                logger.info(
+                    f'Found {len(self._rdfs_classes)} RDFS classes and '
+                    f'{len(self._rdfs_properties)} properties'
+                )
 
             # Create the RO-Crate data section
             if not archive.data:
@@ -247,20 +295,24 @@ class ROCrateParser(MatchingParser):
             )
             
             # Add debugging info to help with upload issues
-            logger.info(
-                f'Archive populated: data={archive.data is not None}, '
-                f'workflow2={archive.workflow2 is not None}'
-            )
+            if logger:
+                logger.info(
+                    f'Archive populated: data={archive.data is not None}, '
+                    f'workflow2={archive.workflow2 is not None}'
+                )
             
             # Log the parsing summary
-            logger.info(
-                f'Successfully processed RO-Crate with {len(self._data_instances)} '
-                f'data instances from {len(graph)} graph entities'
-            )
+            if logger:
+                logger.info(
+                    f'Successfully processed RO-Crate with {len(self._data_instances)} '
+                    f'data instances from {len(graph)} graph entities'
+                )
 
         except json.JSONDecodeError as e:
-            logger.error(f'Invalid JSON in RO-Crate file: {e}')
+            if logger:
+                logger.error(f'Invalid JSON in RO-Crate file: {e}')
             raise
         except Exception as e:
-            logger.error('Error parsing RO-Crate file', exc_info=e)
+            if logger:
+                logger.error('Error parsing RO-Crate file', exc_info=e)
             raise
