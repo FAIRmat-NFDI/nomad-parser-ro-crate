@@ -21,7 +21,7 @@ import json
 import pytest
 from nomad.datamodel import EntryArchive
 
-from tests.conftest import (
+from ..conftest import (
     COMPLEX_DATA_INSTANCES,
     COMPLEX_RDFS_CLASSES,
     COMPLEX_RDFS_PROPERTIES,

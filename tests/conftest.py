@@ -77,6 +77,7 @@ def log_output():
 @pytest.fixture
 def approx():
     """Fixture for approximate value comparisons."""
+
     def func(expected, abs: float = 0.0, rel=1e-6):
         return pytest.approx(expected, abs=abs, rel=rel)
 
