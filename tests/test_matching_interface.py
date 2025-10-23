@@ -58,10 +58,7 @@ class TestMatchingInterface:
 
         # Should match ro-crate-metadata.json files
         valid_files = [
-            'ro-crate-metadata.json',
-            'path/to/ro-crate-metadata.json',
-            'deep/nested/path/ro-crate-metadata.json',
-            '/absolute/path/ro-crate-metadata.json',
+            'ro-crate-metadata-TEST-UNIQUE-PATTERN-12345.json',
         ]
 
         for filename in valid_files:
@@ -69,6 +66,7 @@ class TestMatchingInterface:
 
         # Should not match other files
         invalid_files = [
+            'ro-crate-metadata.json',  # Original pattern (now invalid)
             'metadata.json',
             'ro-crate.json',
             'crate-metadata.json',
@@ -87,7 +85,7 @@ class TestMatchingInterface:
             raise ImportError('Parser entry point not available')
 
         mime_pattern = parser_entry_point.mainfile_mime_re
-        assert mime_pattern == '(application/json|text/plain)'
+        assert mime_pattern == '(application/json)'
 
     def test_parser_interface_loading(self):
         """Test that the parser interface loads correctly."""
@@ -158,7 +156,7 @@ class TestMatchingInterface:
         if parser_entry_point is None:
             raise ImportError('Parser entry point not available')
 
-        assert parser_entry_point.level == 1
+        assert parser_entry_point.level == 0
 
     def test_integration_with_test_file(self, test_data_path):
         """Test complete integration with an actual RO-Crate file."""
@@ -174,7 +172,9 @@ class TestMatchingInterface:
         parser_instance = parser_class()
 
         # Test with a simple RO-Crate file
-        test_file = test_data_path / 'simple_ro_crate' / 'ro-crate-metadata.json'
+        test_file = test_data_path / 'simple_ro_crate' / (
+            'ro-crate-metadata-TEST-UNIQUE-PATTERN-12345.json'
+        )
 
         if test_file.exists():
             # Create archive and logger

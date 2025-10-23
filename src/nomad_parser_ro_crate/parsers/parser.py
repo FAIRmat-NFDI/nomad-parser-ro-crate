@@ -29,42 +29,42 @@ _PARSE_CALL_COUNT = 0
 
 class ROCrateData(EntryData):
     """A section to hold RO-Crate data."""
-    
+
     crate_context = Quantity(
         type=str,
         description='The @context from the RO-Crate JSON-LD',
-        a_eln={'component': 'StringEditQuantity'}
+        a_eln={'component': 'StringEditQuantity'},
     )
-    
+
     rdfs_classes_count = Quantity(
         type=int,
         description='Number of RDFS classes found in the RO-Crate',
-        a_eln={'component': 'NumberEditQuantity'}
+        a_eln={'component': 'NumberEditQuantity'},
     )
-    
+
     rdfs_properties_count = Quantity(
         type=int,
         description='Number of RDFS properties found in the RO-Crate',
-        a_eln={'component': 'NumberEditQuantity'}
+        a_eln={'component': 'NumberEditQuantity'},
     )
-    
+
     data_instances_count = Quantity(
         type=int,
         description='Number of data instances found in the RO-Crate',
-        a_eln={'component': 'NumberEditQuantity'}
+        a_eln={'component': 'NumberEditQuantity'},
     )
-    
+
     raw_data = Quantity(
         type=str,
         description='Raw JSON-LD data from the RO-Crate file',
-        a_eln={'component': 'StringEditQuantity'}
+        a_eln={'component': 'StringEditQuantity'},
     )
 
 
 class ROCrateParser(MatchingParser):
     """
     A parser for RO-Crate metadata files that works similarly to MetaInfoParser.
-    
+
     This parser:
     1. Reads RO-Crate JSON-LD files (ro-crate-metadata.json)
     2. Extracts schema definitions (RDFS classes and properties)
@@ -99,7 +99,10 @@ class ROCrateParser(MatchingParser):
             elif entity_type == 'rdfs:Property':
                 self._rdfs_properties[entity_id] = entity
             elif entity_type and entity_type not in [
-                'rdfs:Class', 'rdfs:Property', 'owl:restriction', 'CreativeWork'
+                'rdfs:Class',
+                'rdfs:Property',
+                'owl:restriction',
+                'CreativeWork',
             ]:
                 # This is a data instance
                 self._data_instances[entity_id] = entity
@@ -108,50 +111,46 @@ class ROCrateParser(MatchingParser):
         """Create a dynamic NOMAD Section class from an RDFS class definition."""
         class_id = class_def.get('@id', 'unknown')
         class_name = class_id.split(':')[-1] if ':' in class_id else class_id
-        
+
         # Clean the class name to be a valid Python identifier
         clean_name = class_name.replace('.', '_').replace('-', '_').replace('/', '_')
-        
+
         description = class_def.get('rdfs:comment', class_def.get('rdfs:label', ''))
-        
+
         # Create quantities for properties that have this class as domain
         quantities = {}
-        
+
         for prop_id, prop_def in self._rdfs_properties.items():
             domain_includes = prop_def.get('schema:domainIncludes')
             if domain_includes:
                 # Handle both single domain and list of domains
                 domains = (
-                    domain_includes 
-                    if isinstance(domain_includes, list) 
+                    domain_includes
+                    if isinstance(domain_includes, list)
                     else [domain_includes]
                 )
                 for domain in domains:
                     domain_id = (
-                        domain.get('@id') 
-                        if isinstance(domain, dict) 
-                        else domain
+                        domain.get('@id') if isinstance(domain, dict) else domain
                     )
                     if domain_id == class_id:
                         prop_name = (
-                            prop_id.split(':')[-1] 
-                            if ':' in prop_id 
-                            else prop_id
+                            prop_id.split(':')[-1] if ':' in prop_id else prop_id
                         )
                         prop_name = (
                             prop_name.replace('.', '_')
                             .replace('-', '_')
                             .replace('/', '_')
                         )
-                        
+
                         # Determine the type based on schema:rangeIncludes
                         range_includes = prop_def.get('schema:rangeIncludes', {})
                         range_type = (
-                            range_includes.get('@id', 'xsd:string') 
-                            if isinstance(range_includes, dict) 
+                            range_includes.get('@id', 'xsd:string')
+                            if isinstance(range_includes, dict)
                             else 'xsd:string'
                         )
-                        
+
                         # Map XSD types to Python types
                         if 'string' in range_type:
                             quantity_type = str
@@ -167,20 +166,19 @@ class ROCrateParser(MatchingParser):
                             quantity_type = str
 
                         prop_description = prop_def.get(
-                            'rdfs:comment', 
-                            prop_def.get('rdfs:label', '')
+                            'rdfs:comment', prop_def.get('rdfs:label', '')
                         )
-                        
+
                         component = (
-                            'StringEditQuantity' 
-                            if quantity_type == str 
+                            'StringEditQuantity'
+                            if quantity_type == str
                             else 'NumberEditQuantity'
                         )
-                        
+
                         quantities[prop_name] = Quantity(
                             type=quantity_type,
                             description=prop_description,
-                            a_eln={'component': component}
+                            a_eln={'component': component},
                         )
 
         # Create the dynamic class
@@ -190,24 +188,24 @@ class ROCrateParser(MatchingParser):
             {
                 '__module__': __name__,
                 'm_def': Section(description=description),
-                **quantities
-            }
+                **quantities,
+            },
         )
-        
+
         return dynamic_class
 
     def _create_nomad_quantity(self, prop_def: dict[str, Any]) -> Quantity:
         """Create a NOMAD Quantity from an RDFS property definition."""
         prop_description = prop_def.get('rdfs:comment', prop_def.get('rdfs:label', ''))
-        
+
         # Determine the type based on schema:rangeIncludes
         range_includes = prop_def.get('schema:rangeIncludes', {})
         range_type = (
-            range_includes.get('@id', 'xsd:string') 
-            if isinstance(range_includes, dict) 
+            range_includes.get('@id', 'xsd:string')
+            if isinstance(range_includes, dict)
             else 'xsd:string'
         )
-        
+
         # Map XSD types to Python types
         if 'string' in range_type:
             quantity_type = str
@@ -223,15 +221,13 @@ class ROCrateParser(MatchingParser):
             quantity_type = str
 
         component = (
-            'StringEditQuantity' 
-            if quantity_type == str 
-            else 'NumberEditQuantity'
+            'StringEditQuantity' if quantity_type == str else 'NumberEditQuantity'
         )
-        
+
         return Quantity(
             type=quantity_type,
             description=prop_description,
-            a_eln={'component': component}
+            a_eln={'component': component},
         )
 
     def parse(
@@ -243,7 +239,7 @@ class ROCrateParser(MatchingParser):
     ) -> None:
         """
         Parse an RO-Crate metadata file.
-        
+
         This method:
         1. Loads the JSON-LD file
         2. Extracts schema definitions
@@ -253,100 +249,77 @@ class ROCrateParser(MatchingParser):
         # Add comprehensive debugging
         global _PARSE_CALL_COUNT
         _PARSE_CALL_COUNT += 1
-        
+
         debug_msg = (
             f'ROCrateParser.parse called #{_PARSE_CALL_COUNT} for: {mainfile}, '
             f'archive id: {id(archive)}, '
             f'parser instance: {id(self)}'
         )
-        
+
         # Print to console AND log
-        print(f"DEBUG RO-CRATE: {debug_msg}")
+        print(f'DEBUG RO-CRATE: {debug_msg}')
         if logger:
             logger.error(debug_msg)
-        
+
         # Check the call stack to see if we're being called recursively
         import traceback
+
         if logger:
             logger.error(f'Call stack: {traceback.format_stack()[-3:-1]}')
 
         # Check if this archive has already been processed by this parser
         # Look for our processing marker first
-        if (hasattr(archive, 'm_annotations') and 
-            archive.m_annotations and 
-            archive.m_annotations.get('ro_crate_processed')):
+        if (
+            hasattr(archive, 'm_annotations')
+            and archive.m_annotations
+            and archive.m_annotations.get('ro_crate_processed')
+        ):
             skip_msg = f'Archive already processed (marker found), skipping: {mainfile}'
-            print(f"DEBUG RO-CRATE: {skip_msg}")
+            print(f'DEBUG RO-CRATE: {skip_msg}')
             if logger:
                 logger.error(skip_msg)
             return
 
         # Check if this archive has already been processed by this parser
         # Look for multiple indicators to be more robust
-        if (hasattr(archive, 'data') and archive.data and 
-            isinstance(archive.data, ROCrateData) and
-            hasattr(archive.data, 'raw_data') and archive.data.raw_data):
-            skip_msg = f'Archive already processed by RO-Crate parser, skipping: {mainfile}'
-            print(f"DEBUG RO-CRATE: {skip_msg}")
+        if (
+            hasattr(archive, 'data')
+            and archive.data
+            and isinstance(archive.data, ROCrateData)
+            and hasattr(archive.data, 'raw_data')
+            and archive.data.raw_data
+        ):
+            skip_msg = (
+                f'Archive already processed by RO-Crate parser, skipping: {mainfile}'
+            )
+            print(f'DEBUG RO-CRATE: {skip_msg}')
             if logger:
                 logger.error(skip_msg)
             return
 
         # Also check if workflow2 is already set to our specific workflow
-        if (hasattr(archive, 'workflow2') and archive.workflow2 and
-            hasattr(archive.workflow2, 'name') and 
-            archive.workflow2.name == 'RO-Crate Processing'):
+        if (
+            hasattr(archive, 'workflow2')
+            and archive.workflow2
+            and hasattr(archive.workflow2, 'name')
+            and archive.workflow2.name == 'RO-Crate Processing'
+        ):
             skip_msg = f'Workflow already set by RO-Crate parser, skipping: {mainfile}'
-            print(f"DEBUG RO-CRATE: {skip_msg}")
+            print(f'DEBUG RO-CRATE: {skip_msg}')
             if logger:
                 logger.error(skip_msg)
             return
 
         try:
-            # Early exit for debugging - just create minimal data and return
-            if logger:
-                logger.error('Creating minimal archive for debugging...')
-            
             # Load the RO-Crate JSON-LD file
             with open(mainfile, encoding='utf-8') as f:
                 ro_crate_data = json.load(f)
 
-            # Create the RO-Crate data section immediately
-            if not archive.data:
-                archive.data = ROCrateData()
-            
-            # Set minimal data
-            archive.data.crate_context = str(ro_crate_data.get('@context', ''))
-            archive.data.rdfs_classes_count = 0
-            archive.data.rdfs_properties_count = 0 
-            archive.data.data_instances_count = 1  # Just mark that we processed it
-            archive.data.raw_data = json.dumps(ro_crate_data, indent=2)
-
-            # Set workflow information with a unique marker
-            archive.workflow2 = Workflow(
-                name='RO-Crate Processing',
-                workflow_type='data_management'
-            )
-            
-            # Add a processing marker to prevent duplicate processing
-            if not hasattr(archive, 'm_annotations'):
-                archive.m_annotations = {}
-            archive.m_annotations['ro_crate_processed'] = True
-            
-            complete_msg = f'Minimal processing completed for {mainfile}'
-            print(f"DEBUG RO-CRATE: {complete_msg}")
-            if logger:
-                logger.error(complete_msg)
-            return
-            # Load the RO-Crate JSON-LD file
-            with open(mainfile, encoding='utf-8') as f:
-                ro_crate_data = json.load(f)
-            
             # Extract the graph
             graph = ro_crate_data.get('@graph', [])
             if logger:
-                logger.error(f'Found {len(graph)} entities in @graph')
-            
+                logger.info(f'Found {len(graph)} entities in @graph')
+
             if not graph:
                 if logger:
                     logger.warning('No @graph found in RO-Crate file')
@@ -374,7 +347,7 @@ class ROCrateParser(MatchingParser):
             # Create the RO-Crate data section
             if not archive.data:
                 archive.data = ROCrateData()
-            
+
             # Populate basic metadata
             archive.data.crate_context = str(ro_crate_data.get('@context', ''))
             archive.data.rdfs_classes_count = len(self._rdfs_classes)
@@ -384,22 +357,21 @@ class ROCrateParser(MatchingParser):
 
             # Set workflow information with a unique marker
             archive.workflow2 = Workflow(
-                name='RO-Crate Processing',
-                workflow_type='data_management'
+                name='RO-Crate Processing', workflow_type='data_management'
             )
-            
+
             # Add a processing marker to prevent duplicate processing
             if not hasattr(archive, 'm_annotations'):
                 archive.m_annotations = {}
             archive.m_annotations['ro_crate_processed'] = True
-            
+
             # Add debugging info to help with upload issues
             if logger:
                 logger.info(
                     f'Archive populated: data={archive.data is not None}, '
                     f'workflow2={archive.workflow2 is not None}'
                 )
-            
+
             # Log the parsing summary
             if logger:
                 logger.info(

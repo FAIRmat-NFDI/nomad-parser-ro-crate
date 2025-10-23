@@ -93,6 +93,6 @@ For optimal parsing results:
 parser_entry_point = ROCrateParserEntryPoint(
     name='parsers/ro-crate',
     description='NOMAD parser for RO-Crate JSON-LD metadata files.',
-    mainfile_name_re=r'(^|.*/)ro-crate-metadata\.json$',
-    mainfile_mime_re=r'(application/json)',  # Remove text/plain to be more specific
+    mainfile_name_re=r'^ro-crate-metadata-TEST-UNIQUE-PATTERN-12345\.json$',
+    mainfile_mime_re=r'(application/json)',
 )
