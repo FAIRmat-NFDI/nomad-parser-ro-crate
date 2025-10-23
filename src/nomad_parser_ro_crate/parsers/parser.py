@@ -254,12 +254,16 @@ class ROCrateParser(MatchingParser):
         global _PARSE_CALL_COUNT
         _PARSE_CALL_COUNT += 1
         
+        debug_msg = (
+            f'ROCrateParser.parse called #{_PARSE_CALL_COUNT} for: {mainfile}, '
+            f'archive id: {id(archive)}, '
+            f'parser instance: {id(self)}'
+        )
+        
+        # Print to console AND log
+        print(f"DEBUG RO-CRATE: {debug_msg}")
         if logger:
-            logger.error(
-                f'ROCrateParser.parse called #{_PARSE_CALL_COUNT} for: {mainfile}, '
-                f'archive id: {id(archive)}, '
-                f'parser instance: {id(self)}'
-            )
+            logger.error(debug_msg)
         
         # Check the call stack to see if we're being called recursively
         import traceback
@@ -271,11 +275,10 @@ class ROCrateParser(MatchingParser):
         if (hasattr(archive, 'm_annotations') and 
             archive.m_annotations and 
             archive.m_annotations.get('ro_crate_processed')):
+            skip_msg = f'Archive already processed (marker found), skipping: {mainfile}'
+            print(f"DEBUG RO-CRATE: {skip_msg}")
             if logger:
-                logger.error(
-                    f'Archive already processed (marker found), '
-                    f'skipping: {mainfile}'
-                )
+                logger.error(skip_msg)
             return
 
         # Check if this archive has already been processed by this parser
@@ -283,22 +286,20 @@ class ROCrateParser(MatchingParser):
         if (hasattr(archive, 'data') and archive.data and 
             isinstance(archive.data, ROCrateData) and
             hasattr(archive.data, 'raw_data') and archive.data.raw_data):
+            skip_msg = f'Archive already processed by RO-Crate parser, skipping: {mainfile}'
+            print(f"DEBUG RO-CRATE: {skip_msg}")
             if logger:
-                logger.error(
-                    f'Archive already processed by RO-Crate parser, '
-                    f'skipping: {mainfile}'
-                )
+                logger.error(skip_msg)
             return
 
         # Also check if workflow2 is already set to our specific workflow
         if (hasattr(archive, 'workflow2') and archive.workflow2 and
             hasattr(archive.workflow2, 'name') and 
             archive.workflow2.name == 'RO-Crate Processing'):
+            skip_msg = f'Workflow already set by RO-Crate parser, skipping: {mainfile}'
+            print(f"DEBUG RO-CRATE: {skip_msg}")
             if logger:
-                logger.error(
-                    f'Workflow already set by RO-Crate parser, '
-                    f'skipping: {mainfile}'
-                )
+                logger.error(skip_msg)
             return
 
         try:
@@ -332,8 +333,10 @@ class ROCrateParser(MatchingParser):
                 archive.m_annotations = {}
             archive.m_annotations['ro_crate_processed'] = True
             
+            complete_msg = f'Minimal processing completed for {mainfile}'
+            print(f"DEBUG RO-CRATE: {complete_msg}")
             if logger:
-                logger.error(f'Minimal processing completed for {mainfile}')
+                logger.error(complete_msg)
             return
             # Load the RO-Crate JSON-LD file
             with open(mainfile, encoding='utf-8') as f:

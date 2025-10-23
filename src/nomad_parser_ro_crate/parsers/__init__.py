@@ -37,7 +37,7 @@ class ROCrateParserEntryPoint(ParserEntryPoint):
         """,
     )
     level: int = Field(
-        1,
+        0,
         description="""
         Order of execution of parser with respect to other parsers.
         """,
@@ -94,5 +94,5 @@ parser_entry_point = ROCrateParserEntryPoint(
     name='parsers/ro-crate',
     description='NOMAD parser for RO-Crate JSON-LD metadata files.',
     mainfile_name_re=r'(^|.*/)ro-crate-metadata\.json$',
-    mainfile_mime_re=r'(application/json|text/plain)',
+    mainfile_mime_re=r'(application/json)',  # Remove text/plain to be more specific
 )
