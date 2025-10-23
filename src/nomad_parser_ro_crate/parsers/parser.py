@@ -23,6 +23,9 @@ configuration = config.get_plugin_entry_point(
     'nomad_parser_ro_crate.parsers:parser_entry_point'
 )
 
+# Global counter for debugging
+_PARSE_CALL_COUNT = 0
+
 
 class ROCrateData(EntryData):
     """A section to hold RO-Crate data."""
@@ -247,11 +250,21 @@ class ROCrateParser(MatchingParser):
         3. Creates dynamic NOMAD sections
         4. Populates the archive with data
         """
+        # Add comprehensive debugging
+        global _PARSE_CALL_COUNT
+        _PARSE_CALL_COUNT += 1
+        
         if logger:
-            logger.info(
-                f'ROCrateParser.parse called for: {mainfile}, '
-                f'archive id: {id(archive)}'
+            logger.error(
+                f'ROCrateParser.parse called #{_PARSE_CALL_COUNT} for: {mainfile}, '
+                f'archive id: {id(archive)}, '
+                f'parser instance: {id(self)}'
             )
+        
+        # Check the call stack to see if we're being called recursively
+        import traceback
+        if logger:
+            logger.error(f'Call stack: {traceback.format_stack()[-3:-1]}')
 
         # Check if this archive has already been processed by this parser
         # Look for our processing marker first
@@ -259,7 +272,7 @@ class ROCrateParser(MatchingParser):
             archive.m_annotations and 
             archive.m_annotations.get('ro_crate_processed')):
             if logger:
-                logger.warning(
+                logger.error(
                     f'Archive already processed (marker found), '
                     f'skipping: {mainfile}'
                 )
@@ -271,7 +284,7 @@ class ROCrateParser(MatchingParser):
             isinstance(archive.data, ROCrateData) and
             hasattr(archive.data, 'raw_data') and archive.data.raw_data):
             if logger:
-                logger.warning(
+                logger.error(
                     f'Archive already processed by RO-Crate parser, '
                     f'skipping: {mainfile}'
                 )
@@ -282,19 +295,55 @@ class ROCrateParser(MatchingParser):
             hasattr(archive.workflow2, 'name') and 
             archive.workflow2.name == 'RO-Crate Processing'):
             if logger:
-                logger.warning(
+                logger.error(
                     f'Workflow already set by RO-Crate parser, '
                     f'skipping: {mainfile}'
                 )
             return
 
         try:
+            # Early exit for debugging - just create minimal data and return
+            if logger:
+                logger.error('Creating minimal archive for debugging...')
+            
+            # Load the RO-Crate JSON-LD file
+            with open(mainfile, encoding='utf-8') as f:
+                ro_crate_data = json.load(f)
+
+            # Create the RO-Crate data section immediately
+            if not archive.data:
+                archive.data = ROCrateData()
+            
+            # Set minimal data
+            archive.data.crate_context = str(ro_crate_data.get('@context', ''))
+            archive.data.rdfs_classes_count = 0
+            archive.data.rdfs_properties_count = 0 
+            archive.data.data_instances_count = 1  # Just mark that we processed it
+            archive.data.raw_data = json.dumps(ro_crate_data, indent=2)
+
+            # Set workflow information with a unique marker
+            archive.workflow2 = Workflow(
+                name='RO-Crate Processing',
+                workflow_type='data_management'
+            )
+            
+            # Add a processing marker to prevent duplicate processing
+            if not hasattr(archive, 'm_annotations'):
+                archive.m_annotations = {}
+            archive.m_annotations['ro_crate_processed'] = True
+            
+            if logger:
+                logger.error(f'Minimal processing completed for {mainfile}')
+            return
             # Load the RO-Crate JSON-LD file
             with open(mainfile, encoding='utf-8') as f:
                 ro_crate_data = json.load(f)
             
             # Extract the graph
             graph = ro_crate_data.get('@graph', [])
+            if logger:
+                logger.error(f'Found {len(graph)} entities in @graph')
+            
             if not graph:
                 if logger:
                     logger.warning('No @graph found in RO-Crate file')
@@ -309,11 +358,14 @@ class ROCrateParser(MatchingParser):
                 return
 
             # Extract schema definitions
+            if logger:
+                logger.error('Starting schema extraction...')
             self._extract_schema_definitions(graph)
             if logger:
-                logger.info(
-                    f'Found {len(self._rdfs_classes)} RDFS classes and '
-                    f'{len(self._rdfs_properties)} properties'
+                logger.error(
+                    f'Extracted {len(self._rdfs_classes)} RDFS classes and '
+                    f'{len(self._rdfs_properties)} properties and '
+                    f'{len(self._data_instances)} data instances'
                 )
 
             # Create the RO-Crate data section
