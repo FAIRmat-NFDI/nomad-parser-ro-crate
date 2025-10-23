@@ -44,10 +44,10 @@ class ROCrateParserEntryPoint(ParserEntryPoint):
     )
     code_name: str | None = 'RO-Crate'
     code_homepage: str | None = 'https://w3id.org/ro/crate'
-    code_category: str | None = 'Data management'
+    code_category: str | None = None
     metadata: dict | None = Field(
         {
-            'codeCategory': 'Data management',
+            'codeCategory': None,
             'codeLabel': 'RO-Crate',
             'codeLabelStyle': 'RO in capitals, hyphen, Crate with capital C',
             'codeName': 'ro-crate',

@@ -46,7 +46,7 @@ class TestMatchingInterface:
         assert parser_entry_point.description == expected_description
         assert parser_entry_point.code_name == 'RO-Crate'
         assert parser_entry_point.code_homepage == 'https://w3id.org/ro/crate'
-        assert parser_entry_point.code_category == 'Data management'
+        assert parser_entry_point.code_category is None  # No category set
         assert parser_entry_point.plugin_package is None  # Default when run locally
 
     def test_mainfile_pattern_matching(self):
@@ -132,7 +132,7 @@ class TestMatchingInterface:
         metadata = parser_entry_point.metadata
 
         assert metadata is not None
-        assert metadata['codeCategory'] == 'Data management'
+        assert metadata['codeCategory'] is None
         assert metadata['codeLabel'] == 'RO-Crate'
         expected_style = 'RO in capitals, hyphen, Crate with capital C'
         assert metadata['codeLabelStyle'] == expected_style
