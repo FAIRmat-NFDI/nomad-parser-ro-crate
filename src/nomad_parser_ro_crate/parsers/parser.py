@@ -75,7 +75,7 @@ class ROCrateParser(MatchingParser):
             code_name='ro-crate',
             domain='generic',
             mainfile_mime_re='application/json',
-            mainfile_name_re=r'.*ro-crate-metadata\.json$',
+            mainfile_name_re=r'(^|.*/)ro-crate-metadata\.json$',
         )
         self._rdfs_classes = {}
         self._rdfs_properties = {}
@@ -247,11 +247,21 @@ class ROCrateParser(MatchingParser):
         3. Creates dynamic NOMAD sections
         4. Populates the archive with data
         """
-        logger.info(f'ROCrateParser.parse: {mainfile}') if logger else None
+        logger.info(f'ROCrateParser.parse called for: {mainfile}') if logger else None
+
+        # Check if this archive has already been processed by this parser
+        if (hasattr(archive, 'data') and archive.data and 
+            hasattr(archive.data, 'raw_data') and archive.data.raw_data):
+            if logger:
+                logger.warning(
+                    f'Archive already processed by RO-Crate parser, '
+                    f'skipping: {mainfile}'
+                )
+            return
 
         try:
             # Load the RO-Crate JSON-LD file
-            with open(mainfile, 'r', encoding='utf-8') as f:
+            with open(mainfile, encoding='utf-8') as f:
                 ro_crate_data = json.load(f)
             
             # Extract the graph
