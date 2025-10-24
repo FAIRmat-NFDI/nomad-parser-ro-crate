@@ -58,7 +58,9 @@ class TestMatchingInterface:
 
         # Should match ro-crate-metadata.json files
         valid_files = [
-            'ro-crate-metadata-TEST-UNIQUE-PATTERN-12345.json',
+            'ro-crate-metadata.json',
+            'path/to/ro-crate-metadata.json',
+            'some/deep/path/ro-crate-metadata.json',
         ]
 
         for filename in valid_files:
@@ -66,13 +68,14 @@ class TestMatchingInterface:
 
         # Should not match other files
         invalid_files = [
-            'ro-crate-metadata.json',  # Original pattern (now invalid)
+            'ro-crate-metadata-TEST-UNIQUE-PATTERN-12345.json',  # Test-specific file
             'metadata.json',
             'ro-crate.json',
             'crate-metadata.json',
             'ro-crate-metadata.txt',
             'ro-crate-metadata.json.bak',
             'not-ro-crate-metadata.json',
+            'ro-crate-metadata-extra.json',
         ]
 
         for filename in invalid_files:
@@ -172,9 +175,7 @@ class TestMatchingInterface:
         parser_instance = parser_class()
 
         # Test with a simple RO-Crate file
-        test_file = test_data_path / 'simple_ro_crate' / (
-            'ro-crate-metadata-TEST-UNIQUE-PATTERN-12345.json'
-        )
+        test_file = test_data_path / 'simple_ro_crate' / 'ro-crate-metadata.json'
 
         if test_file.exists():
             # Create archive and logger
