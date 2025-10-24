@@ -50,32 +50,34 @@ class TestMatchingInterface:
         assert parser_entry_point.plugin_package is None  # Default when run locally
 
     def test_mainfile_pattern_matching(self):
-        """Test that the mainfile pattern matches correct files."""
+        """Test that the mainfile pattern matches potential RO-Crate files."""
         if parser_entry_point is None:
             raise ImportError('Parser entry point not available')
 
         pattern = parser_entry_point.mainfile_name_re
 
-        # Should match ro-crate-metadata.json files
+        # Should match potential RO-Crate files with flexible naming
         valid_files = [
             'ro-crate-metadata.json',
+            'simple-ro-crate-metadata.json',
+            'experiment-metadata.json',
             'path/to/ro-crate-metadata.json',
-            'some/deep/path/ro-crate-metadata.json',
+            'some/deep/path/metadata.json',
+            'ro-crate-data.json',
+            'crate-info.json',
+            'ro-crate-metadata-TEST-UNIQUE-PATTERN-12345.json',  # Now valid
         ]
 
         for filename in valid_files:
             assert re.match(pattern, filename), f'Pattern should match {filename}'
 
-        # Should not match other files
+        # Should not match non-JSON or clearly non-RO-Crate files
         invalid_files = [
-            'ro-crate-metadata-TEST-UNIQUE-PATTERN-12345.json',  # Test-specific file
-            'metadata.json',
-            'ro-crate.json',
-            'crate-metadata.json',
             'ro-crate-metadata.txt',
             'ro-crate-metadata.json.bak',
-            'not-ro-crate-metadata.json',
-            'ro-crate-metadata-extra.json',
+            'data.csv',
+            'config.xml',
+            'readme.md',
         ]
 
         for filename in invalid_files:
@@ -175,7 +177,7 @@ class TestMatchingInterface:
         parser_instance = parser_class()
 
         # Test with a simple RO-Crate file
-        test_file = test_data_path / 'simple_ro_crate' / 'ro-crate-metadata.json'
+        test_file = test_data_path / 'simple-ro-crate-metadata.json'
 
         if test_file.exists():
             # Create archive and logger
