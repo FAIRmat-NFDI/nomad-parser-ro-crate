@@ -69,9 +69,6 @@ class ROCrateParser(MatchingParser):
     4. Populates the archive with data instances following the schema
     """
 
-    # Temporary class-level tracking for debugging (can be removed later)
-    _processed_files = set()
-
     def __init__(self):
         super().__init__(
             name='parsers/ro-crate',
